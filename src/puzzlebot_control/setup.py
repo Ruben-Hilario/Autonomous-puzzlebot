@@ -15,6 +15,7 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
         (os.path.join('share', package_name, 'config'), glob(os.path.join('config', '*.[yma]*'))),
         (os.path.join('share', package_name, 'rviz'), glob(os.path.join('rviz', '*.rviz'))),
+        (os.path.join('share', package_name, 'conf'), glob(os.path.join('conf','*.yaml'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,7 +25,8 @@ setup(
     license='Apache-2.0',
     entry_points={
         'console_scripts': [
-            'open_loop_control = puzzlebot_control.open_loop_control:main'
+            'open_loop_control = puzzlebot_control.open_loop_control:main',
+            'route = puzzlebot_control.route:main',
         ],
     },
 )

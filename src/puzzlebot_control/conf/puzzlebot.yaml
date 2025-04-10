@@ -1,0 +1,5 @@
+open_loop_ctrl:
+  ros__parameters:
+    linear_speed: 0.2
+    angular_speed: 0.5
+    waypoints: [[1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]

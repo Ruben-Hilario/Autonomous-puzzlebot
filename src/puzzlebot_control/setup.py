@@ -27,6 +27,8 @@ setup(
         'console_scripts': [
             'open_loop_control = puzzlebot_control.open_loop_control:main',
             'route = puzzlebot_control.route:main',
+            'path_generator = puzzlebot_control.path_generator:main',
+            'test = puzzlebot_control.test:main',
         ],
     },
 )

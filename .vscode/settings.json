@@ -1,0 +1,16 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/testeo/install/puzzlebot_description/lib/python3.10/site-packages",
+        "/home/testeo/install/puzzlebot_control/lib/python3.10/site-packages",
+        "/home/testeo/install/custom_interfaces/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/testeo/install/puzzlebot_description/lib/python3.10/site-packages",
+        "/home/testeo/install/puzzlebot_control/lib/python3.10/site-packages",
+        "/home/testeo/install/custom_interfaces/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}

@@ -3,7 +3,7 @@ import rclpy
 from rclpy.node import Node
 import numpy as np
 from std_msgs.msg import Float32
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, PoseStamped
 from rcl_interfaces.msg import SetParametersResult
 
 class OpenLoopCtrl(Node):
@@ -12,14 +12,16 @@ class OpenLoopCtrl(Node):
 
         self.wait_for_ros_time()
 
-        # Publisher to /cmd_vel
+        # Publishers
         self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
-        self.cmd_pose = self.create_publisher(Twist,'pose',10)
-        #Declare parameters
-        self.declare_parameter('linear_speed',0.2)
-        self.declare_parameter('angular_speed',0.5)
-        self.declare_parameter('waypoints', [1.0, 1.0, 0.0, 1.0, 1.5, 1.5,2.0,2.0,2.0,1.0])
+        self.pose_pub = self.create_publisher(PoseStamped, 'pose', 10)
+
+        # Declare parameters
+        self.declare_parameter('linear_speed', 0.2)
+        self.declare_parameter('angular_speed', 0.5)
+        self.declare_parameter('waypoints', [1.0, 1.0, 0.0, 1.0, 1.5, 1.5, 2.0, 2.0, 2.0, 1.0])
         self.add_on_set_parameters_callback(self.parameters_callback)
+
         # Time-based control variables
         self.state = 0  # 0: rotate, 1: forward, 2: stop
         self.state_start_time = self.get_clock().now()
@@ -29,52 +31,48 @@ class OpenLoopCtrl(Node):
         self.y = 0.0
         self.theta = 0.0
         flat = self.get_parameter('waypoints').value
-        self.waypoints = [(flat[i], flat[i+1]) for i in range(0, len(flat), 2)]
+        self.waypoints = [(flat[i], flat[i + 1]) for i in range(0, len(flat), 2)]
         self.current_waypoint_index = 0
-        
+
         # Define speeds
-        self.linear_speed = self.get_parameter('linear_speed').value  # m/s
-        self.angular_speed = self.get_parameter('angular_speed').value  # rad/s
-        
-        # Initialize movement parameters for first waypoint
+        self.linear_speed = self.get_parameter('linear_speed').value
+        self.angular_speed = self.get_parameter('angular_speed').value
+
+        # Initialize movement parameters
         self.update_movement_parameters()
-        
-        # Timer to update state machine
-        self.timer_period = 0.2  # 10 Hz control loop
+
+        # Timer for control loop
+        self.timer_period = 0.2  # 5 Hz
         self.timer = self.create_timer(self.timer_period, self.control_loop)
         self.get_logger().info('Open loop controller initialized!')
-        
+
     def update_movement_parameters(self):
-        """Calculate movement parameters for current waypoint"""
         if self.current_waypoint_index < len(self.waypoints):
             self.final_x, self.final_y = self.waypoints[self.current_waypoint_index]
             target_angle = np.arctan2((self.final_y - self.y), (self.final_x - self.x))
             self.angle = self.wrap_to_Pi(target_angle - self.theta)
-            self.distance = np.sqrt((self.final_x-self.x)**2 + (self.final_y-self.y)**2)
+            self.distance = np.sqrt((self.final_x - self.x) ** 2 + (self.final_y - self.y) ** 2)
             self.forward_time = self.distance / self.linear_speed
             self.rotate_time = abs(self.angle) / self.angular_speed
             self.get_logger().info(f"Rotation Angle: {self.angle}")
             self.get_logger().info(f"Distance: {self.distance}")
-            self.get_logger().info(f'Moving to waypoint {self.current_waypoint_index+1}: ({self.final_x}, {self.final_y})')
-        
-    
+            self.get_logger().info(f'Moving to waypoint {self.current_waypoint_index + 1}: ({self.final_x}, {self.final_y})')
+
     def control_loop(self):
         now = self.get_clock().now()
         elapsed_time = (now - self.state_start_time).nanoseconds * 1e-9
         cmd = Twist()
-        
+
         if self.state == 0:
-            # Rotate to face the goal
             cmd.angular.z = np.sign(self.angle) * self.angular_speed
             self.get_logger().info('Rotating to face goal...')
             if elapsed_time >= self.rotate_time:
                 self.state = 1
                 self.state_start_time = now
                 self.get_logger().info('Finished rotation. Moving forward...')
-                
+
         elif self.state == 1:
-            # Move forward to goal
-            dt = self.timer_period  # Time since last loop
+            dt = self.timer_period
             dx = self.linear_speed * np.cos(self.theta) * dt
             dy = self.linear_speed * np.sin(self.theta) * dt
             self.x += dx
@@ -82,35 +80,45 @@ class OpenLoopCtrl(Node):
             cmd.linear.x = self.linear_speed
             self.get_logger().info('Moving forward to goal...')
             if elapsed_time >= self.forward_time:
-                # Update position to current waypoint
                 self.x = self.final_x
                 self.y = self.final_y
-                self.theta = self.angle
-                
-                # Move to next waypoint or stop
+                self.theta += self.angle
+                self.theta = self.wrap_to_Pi(self.theta)
+
                 self.current_waypoint_index += 1
                 if self.current_waypoint_index < len(self.waypoints):
                     self.update_movement_parameters()
-                    self.state = 0  # Start with rotation for next waypoint
+                    self.state = 0
                     self.state_start_time = now
                     self.get_logger().info('Starting movement to next waypoint...')
                 else:
-                    self.state = 2  # All waypoints reached
+                    self.state = 2
                     self.state_start_time = now
                     self.get_logger().info('All waypoints reached. Stopping...')
-                    
+
         elif self.state == 2:
-            # Stop
             cmd.linear.x = 0.0
             cmd.angular.z = 0.0
             self.get_logger().info('Stopped.')
-            self.timer.cancel()  # Stop the control loop
+            self.timer.cancel()
 
         self.cmd_vel_pub.publish(cmd)
+        # Publicar pose actual
+        pose_msg = PoseStamped()
+        pose_msg.header.stamp = now.to_msg()
+        pose_msg.header.frame_id = 'map'
+        pose_msg.pose.position.x = self.x
+        pose_msg.pose.position.y = self.y
+        pose_msg.pose.position.z = 0.0
+        qz = np.sin(self.theta / 2.0)
+        qw = np.cos(self.theta / 2.0)
+        pose_msg.pose.orientation.z = qz
+        pose_msg.pose.orientation.w = qw
+        self.pose_pub.publish(pose_msg)
 
     def wrap_to_Pi(self, theta):
         result = np.fmod((theta + np.pi), (2 * np.pi))
-        if (result < 0):
+        if result < 0:
             result += 2 * np.pi
         return result - np.pi
 
@@ -135,7 +143,7 @@ class OpenLoopCtrl(Node):
                 try:
                     flat = param.value
                     if len(flat) % 2 == 0:
-                        self.waypoints = [(flat[i], flat[i+1]) for i in range(0, len(flat), 2)]
+                        self.waypoints = [(flat[i], flat[i + 1]) for i in range(0, len(flat), 2)]
                         self.get_logger().info(f"Updated waypoints to {self.waypoints}")
                         self.current_waypoint_index = 0
                         self.update_movement_parameters()

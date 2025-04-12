@@ -5,23 +5,21 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
-    # Include the Gazebo launch file
-    gazebo_launch = IncludeLaunchDescription(
-        os.path.join(
-            get_package_share_directory('puzzlebot_description'),
-            'launch',
-            'gazebo.launch.py'
-        )
+    # Path Generator node
+    path_generator_node = Node(
+        package='puzzlebot_control',
+        executable='path_generator',  # Nombre del ejecutable para el nodo path_generator
+        output='screen'
     )
 
-    # Open loop controller node
-    open_loop_controller = Node(
+    # Controller node
+    controller_node = Node(
         package='puzzlebot_control',
-        executable='open_loop_control',
+        executable='test',  # Nombre del ejecutable para el nodo controller
         output='screen'
     )
 
     return LaunchDescription([
-        gazebo_launch,
-        open_loop_controller
+        path_generator_node,
+        controller_node
     ])

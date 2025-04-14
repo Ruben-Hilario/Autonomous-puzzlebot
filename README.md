@@ -75,32 +75,24 @@ El controlador del *Puzzlebot* se basa en el modelo de cinemática de un robot d
 
 Sea:
 
--  $\`v\`$ : Velocidad lineal del robot
--  $\`omega\`$: Velocidad angular del robot
-- $\`R\`$: Radio de las ruedas
-- $\`L\`$: Distancia entre las ruedas (eje del robot)
-- $\`\omega_r\`$: Velocidad angular de la rueda derecha  
-- $\`\omega_l\`$: Velocidad angular de la rueda izquierda
+-  $\v\$ : Velocidad lineal del robot
+-  $\omega`$: Velocidad angular del robot
+- $\R\$: Radio de las ruedas
+- $\L\$: Distancia entre las ruedas (eje del robot)
+- $\omega_r\$: Velocidad angular de la rueda derecha  
+- $\omega_l\$: Velocidad angular de la rueda izquierda
 
 Entonces:
 
-\[
-v = \frac{R}{2} (\omega_r + \omega_l)
-\]
+$$\v = \frac{R}{2} (\omega_r + \omega_l)\$$
 
-\[
-\omega = \frac{R}{L} (\omega_r - \omega_l)
-\]
+$$\omega = \frac{R}{L} (\omega_r - \omega_l)\$$
 
 A partir de las velocidades lineal y angular deseadas (\( v, \omega \)), se puede obtener la velocidad de cada rueda:
 
-\[
-\omega_r = \frac{v}{R} + \frac{L \cdot \omega}{2R}
-\]
+$$\omega_r = \frac{v}{R} + \frac{L \cdot \omega}{2R}\$$
 
-\[
-\omega_l = \frac{v}{R} - \frac{L \cdot \omega}{2R}
-\]
+$$\\omega_l = \frac{v}{R} - \frac{L \cdot \omega}{2R}\$$
 
 Estas ecuaciones son fundamentales para convertir las señales de control en movimientos reales del robot.
 

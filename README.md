@@ -1,3 +1,3 @@
 # Autonomous-puzzlebot
 
-[![Ball Tracking Nodes](thumbnail.png)](https://youtu.be/DpJ1DxQWpf8)
+[![Ball Tracking Nodes](thumbnail.png)](https://youtu.be/6bQcEN82LVg)

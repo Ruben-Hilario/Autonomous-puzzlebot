@@ -69,10 +69,40 @@ Este comando lanza tres nodos clave:
 - `ball_tracker`: Publica la ubicación de la pelota utilizando la información de la cámara.
 
 ---
+### Modelo de Control: Accionamiento Diferencial
 
-### Descripción de los Controladores
+El controlador del *Puzzlebot* se basa en el modelo de cinemática de un robot de accionamiento diferencial. Las siguientes ecuaciones relacionan las velocidades lineales y angulares del robot con las velocidades de sus ruedas:
 
-Se implementaron **dos controladores principales**:
+Sea:
+
+- \( v \): Velocidad lineal del robot  
+- \( \omega \): Velocidad angular del robot  
+- \( R \): Radio de las ruedas  
+- \( L \): Distancia entre las ruedas (eje del robot)  
+- \( \omega_r \): Velocidad angular de la rueda derecha  
+- \( \omega_l \): Velocidad angular de la rueda izquierda  
+
+Entonces:
+
+\[
+v = \frac{R}{2} (\omega_r + \omega_l)
+\]
+
+\[
+\omega = \frac{R}{L} (\omega_r - \omega_l)
+\]
+
+A partir de las velocidades lineal y angular deseadas (\( v, \omega \)), se puede obtener la velocidad de cada rueda:
+
+\[
+\omega_r = \frac{v}{R} + \frac{L \cdot \omega}{2R}
+\]
+
+\[
+\omega_l = \frac{v}{R} - \frac{L \cdot \omega}{2R}
+\]
+
+Estas ecuaciones son fundamentales para convertir las señales de control en movimientos reales del robot.
 
 1. **Controlador basado en OpenCV**  
    - Usa la imagen de la cámara para mantener la pelota centrada en el campo visual.  
@@ -83,7 +113,6 @@ Se implementaron **dos controladores principales**:
    - Calcula la distancia entre el *Puzzlebot* y la pelota.  
    - Ajusta la velocidad lineal del robot: si la pelota está lejos, acelera; si está cerca, reduce la velocidad.  
    - Este comportamiento está parametrizado, permitiendo definir una distancia deseada (*setpoint*) entre el robot y la pelota.
-
 ---
 
 ## Demo
@@ -91,3 +120,5 @@ Se implementaron **dos controladores principales**:
 Haz clic en la imagen del inicio para ver un demo en video del sistema de seguimiento en acción.
 
 ---
+
+

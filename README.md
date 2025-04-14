@@ -75,12 +75,12 @@ El controlador del *Puzzlebot* se basa en el modelo de cinemática de un robot d
 
 Sea:
 
-- $$ v \): Velocidad lineal del robot  $$
-- $$ \omega \): Velocidad angular del robot  $$
-- $$ R \): Radio de las ruedas  $$
-- $$ L \): Distancia entre las ruedas (eje del robot)  $$
-- $$ \omega_r \): Velocidad angular de la rueda derecha  $$
-- $$ \omega_l \): Velocidad angular de la rueda izquierda  $$
+-  $\`v\`$ : Velocidad lineal del robot
+-  $\`omega\`$: Velocidad angular del robot
+- $\`R\`$: Radio de las ruedas
+- $\`L\`$: Distancia entre las ruedas (eje del robot)
+- $\`\omega_r\`$: Velocidad angular de la rueda derecha  
+- $\`\omega_l\`$: Velocidad angular de la rueda izquierda
 
 Entonces:
 

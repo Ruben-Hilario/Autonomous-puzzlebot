@@ -85,7 +85,7 @@ Sea:
 Entonces:
 
 $$
-\v = \frac{R}{2} (\omega_r + \omega_l)
+\mathbf{v} = \frac{R}{2} (\omega_r + \omega_l)
 $$
 
 $$\omega = \frac{R}{L} (\omega_r - \omega_l)\$$

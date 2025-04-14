@@ -1,5 +1,6 @@
 from setuptools import find_packages, setup
 from glob import glob
+import os
 
 package_name = 'puzzlebot_description'
 
@@ -14,6 +15,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+          ('share/' + package_name + '/models/puzzlebot', glob('models/puzzlebot/*.*')),
+        ('share/' + package_name + '/models/puzzlebot/meshes', glob('models/puzzlebot/meshes/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,6 +27,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'localization = puzzlebot_description.localization:main',
+            'joint_pub = puzzlebot_description.joint_pub:main',
+            'ball_movement = puzzlebot_control.ball_test:main',
         ],
     },
 )

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="puzzlebot_with_ball">
+
+  <!-- Include the puzzlebot -->
+  <xacro:include filename="$(find puzzlebot_description)/urdf/puzzlebot.urdf.xacro"/>
+  <xacro:puzzlebot/>
+
+  <!-- Include the ball -->
+  <xacro:include filename="$(find puzzlebot_description)/urdf/ball.urdf.xacro"/>
+  <xacro:ball name="ball_link"/>
+
+  <joint name="ball_fixed_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="ball_link"/>
+    <origin xyz="3.0 0.5 0.5" rpy="0 0 0"/>
+  </joint>
+
+</robot>

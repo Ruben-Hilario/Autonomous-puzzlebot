@@ -29,6 +29,9 @@ setup(
             'route = puzzlebot_control.route:main',
             'path_generator = puzzlebot_control.path_generator:main',
             'test = puzzlebot_control.test:main',
+            'ball_movement = puzzlebot_control.ball_test:main',
+            'PID = puzzlebot_control.PID_Ball_Tracker:main',
+            'ball_tracker = opencv_res.ball_tracker:main',
         ],
     },
 )

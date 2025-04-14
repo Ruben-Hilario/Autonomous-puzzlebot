@@ -1,0 +1,62 @@
+<?xml version='1.0'?>
+<sdf version='1.4'>
+    <model name='ball' canonical_link='sphere'>
+        <link name='sphere'>
+        
+            <!-- Visual representation of the ball -->
+            <visual name='visual'>
+                <geometry>
+                    <!-- <mesh>
+                        <uri>./meshes/ball.stl</uri>
+                        <scale>0.005 0.005 0.005 </scale>
+                    </mesh> -->
+                    <sphere>
+                        <radius>0.1</radius>
+                    </sphere>
+                </geometry>
+                <material>
+                    <ambient>0.0 1.0 0.0 1.0</ambient>
+                    <diffuse>0.0 1.0 0.0 1.0</diffuse>
+                    <specular>0.0 0.0 0.0 1.0</specular>
+                </material>
+            </visual>
+            
+            <!-- Collision properties of the ball -->
+            <collision name='collision'>
+                <geometry>
+                    <!-- <mesh>
+                        <uri>./meshes/ball.stl</uri>
+                        <scale>0.005 0.005 0.005 </scale>
+                    </mesh> -->
+                    <box><size>0.2 0.2 0.2</size></box>
+                </geometry>
+                <surface>
+                    <friction>
+                        <ode>
+                            <mu>1.0</mu> <!-- Adjust friction as needed -->
+                            <mu2>1.0</mu2>
+                        </ode>
+                    </friction>
+                    <restitution>
+                        <coe>0.0</coe> <!-- Control bounciness, adjust if needed -->
+                    </restitution>
+                </surface>
+            </collision>
+
+
+            <!-- Inertial properties -->
+            <inertial>
+                <mass>1.0</mass>
+                <inertia>
+                    <ixx>0.01</ixx>
+                    <iyy>0.01</iyy>
+                    <izz>0.01</izz>
+                </inertia>
+            </inertial>
+        </link>
+        <plugin name="gz::sim::systems::VelocityControl" filename="gz-sim-velocity-control-system">
+           <target_link>sphere</target_link>
+        </plugin>
+
+    </model>
+</sdf>

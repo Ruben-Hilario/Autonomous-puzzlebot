@@ -1,53 +1,6 @@
-Panels:
-  - Class: rviz_common/Displays
-    Name: Displays
-  - Class: rviz_common/Selection
-    Name: Selection
-  - Class: rviz_common/Tool Properties
-    Name: Tool Properties
-  - Class: rviz_common/Views
-    Name: Views
-  - Class: rviz_common/Time
-    Name: Time
-Visualization Manager:
-  Class: ""
-  Displays:
-    - Class: rviz_default_plugins/Image
-      Enabled: true
-      Name: Camera Image
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /video_source/raw
-      Normalize Range: true
-      Min Value: 0
-      Max Value: 1
-      Median window: 5
-      Value: true
-  Enabled: true
-  Global Options:
-    Background Color: 48; 48; 48
-    Fixed Frame: camera_link
-    Frame Rate: 30
-  Name: root
-  Tools:
-    - Class: rviz_default_plugins/MoveCamera
-    - Class: rviz_default_plugins/Select
-  Transformation:
-    Current:
-      Class: rviz_default_plugins/TF
-  Value: true
-  Views:
-    Current:
-      Class: rviz_default_plugins/Camera
-      Name: Camera View
-      Target Frame: camera_link
-      Value: Camera (rviz_default_plugins)
-    Saved: ~
-Window Geometry:
-  Height: 600
-  Width: 800
-  X: 100
-  Y: 100
+# 
+#
+#
+#
+#
+#

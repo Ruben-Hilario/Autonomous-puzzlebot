@@ -9,7 +9,7 @@ class PIDBallFollower(Node):
         self.subscription = self.create_subscription(Point, 'ball_pos', self.PID_loop, 10)
         self.publisher = self.create_publisher(Twist, 'cmd_vel', 10)
         # Image center assumed (adjust if needed)
-        self.image_width = 640  # Default Gazebo cam width, change if different
+        self.image_width = 1280  # Default Gazebo cam width, change if different
         self.image_center_x = self.image_width / 2.0
 
         # PID constants (tune as needed)
@@ -36,7 +36,7 @@ class PIDBallFollower(Node):
 
         # Create Twist message
         twist = Twist()
-        twist.linear.x = 0.1  # Constant forward speed
+        twist.linear.x = 0.2  # Constant forward speed
         twist.angular.z = output  # PID-controlled turn
 
         self.publisher.publish(twist)

@@ -7,9 +7,9 @@ class BallSineMover(Node):
     def __init__(self):
         super().__init__('ball_sine_mover')
 
-        self.amplitude = 5.0
-        self.frequency = 0.5
-        self.forward_speed = 0.1
+        self.amplitude = 1.5
+        self.frequency = 0.3
+        self.forward_speed = 0.2
 
         self.start_time = self.get_clock().now()
 
@@ -27,7 +27,7 @@ class BallSineMover(Node):
 
         cmd = Twist()
         cmd.linear.x = self.forward_speed
-        cmd.linear.y = (2 * np.pi * self.frequency * self.amplitude * np.cos(2 * np.pi * self.frequency * t))/5
+        cmd.linear.y = 2 * np.pi * self.frequency * self.amplitude * np.cos(2 * np.pi * self.frequency * t)
         cmd.linear.z = 0.0
 
         self.cmd_vel_pub.publish(cmd)

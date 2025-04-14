@@ -103,33 +103,6 @@ def generate_launch_description():
             'gz_args': [LaunchConfiguration('world'), '.sdf -r -v 4']
         }.items()
     )
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        output='screen',
-        parameters=[
-            {'use_sim_time':use_sim_time},
-            {'robot_description':open(robot_path).read()}
-        ]
-    )
-    joint_pub = Node(
-        package='puzzlebot_description',
-        executable='joint_pub',
-        name='joint_pub',
-        output='screen',
-        parameters=[{'use_sim_time':use_sim_time}],
-        remappings=[
-            ('/tf','tf'),
-            ('/tf_static','tf_static')
-        ]
-    )
-    localization = Node(
-        package='puzzlebot_description',
-        executable='localization',
-        name='localization',
-        parameters=[{'use_sim_time':use_sim_time}]
-    )
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -149,18 +122,14 @@ def generate_launch_description():
         output='screen',
         parameters=[{'use_sim_time': use_sim_time}]
     )
-    
-    # Create launch description
-    ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(ign_resource_path)
-    ld.add_action(ign_gui_plugin_path)
-    ld.add_action(ignition_gazebo)
-    ld.add_action(clock_bridge)
-    ld.add_action(bridge)
-    ld.add_action(camera_bridge)
-    ld.add_action(robot_state_publisher)
-    ld.add_action(rviz_node)
-    ld.add_action(joint_pub)
-    ld.add_action(localization)
-    ld.add_action(ball_bridge)
-    return ld
+    return LaunchDescription([
+        *ARGUMENTS,
+        ign_resource_path,
+        ign_gui_plugin_path,
+        ignition_gazebo,
+        clock_bridge,
+        bridge,
+        camera_bridge,
+        rviz_node,
+        ball_bridge
+    ])

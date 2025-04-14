@@ -98,8 +98,7 @@ $$\\omega_l = \frac{v}{R} - \frac{L \cdot \omega}{2R}\$$
 
 Estas ecuaciones son fundamentales para convertir las señales de control en movimientos reales del robot.
 
-1. **Controlador basado en OpenCV**  
-   - Usa la imagen de la cámara para mantener la pelota centrada en el campo visual.  
+1. **Controlador basado en OpenCV**    
    - A partir del error de posición de la pelota, se calculan las velocidades angulares necesarias para girar el robot.  
    - Se determinan los ángulos de giro de cada llanta para asegurar que el seguimiento sea suave y preciso.
 

@@ -2,7 +2,7 @@
 
 [![Ball Tracking Nodes](thumbnail.png)](https://youtu.be/6bQcEN82LVg)
 
-Este proyecto implementa diferentes funcionalidades de control y navegación para el *Puzzlebot* utilizando ROS 2 y Gazebo. Incluye control en lazo abierto, seguimiento de rutas personalizadas, y un sistema avanzado de seguimiento de pelota basado en visión por computadora.
+Este proyecto implementa diferentes funcionalidades de control y navegación para el *Puzzlebot* utilizando ROS2 y Gazebo. Incluye control en lazo abierto y cerrado, seguimiento de rutas personalizadas, y un sistema avanzado de seguimiento de pelota basado en visión por computadora.
 
 ---
 
@@ -46,7 +46,7 @@ Puedes ejecutar un recorrido personalizado usando:
 ros2 run puzzlebot_control route
 ```
 
-Para modificar la ruta, edita el archivo `route.py`, específicamente la sección `waypoints`, donde puedes establecer los puntos de navegación que prefieras.
+Para modificar la ruta, edita el archivo `route.py` para establecer los puntos de navegación que prefieras.
 
 ---
 
@@ -62,27 +62,14 @@ Para iniciar todos los nodos relacionados con el seguimiento de pelota:
 ros2 launch puzzlebot_control ball.launch.py
 ```
 
-Este comando lanza tres nodos clave:
-
-- `PID_Ball_Tracker`: Implementa los controladores PID para el seguimiento.
-- `ball_test`: Genera un movimiento senoidal de la pelota para pruebas.
+- `PID_Ball_Tracker`: Control PID para el seguimiento.
+- `ball_test`: Genera movimiento senoidal de la pelota.
 - `ball_tracker`: Publica la ubicación de la pelota utilizando la información de la cámara.
 
 ---
 ### Modelo de Control: Accionamiento Diferencial
 
-El controlador del *Puzzlebot* se basa en el modelo de cinemática de un robot de accionamiento diferencial. Las siguientes ecuaciones relacionan las velocidades lineales y angulares del robot con las velocidades de sus ruedas:
-
-Sea:
-
--  $\mathbf{v}\$: Velocidad lineal del robot
--  $\omega$: Velocidad angular del robot
-- $\mathbf{R}$: Radio de las ruedas
-- $\mathbf{L}$: Distancia entre las ruedas (eje del robot)
-- $\omega_r\$: Velocidad angular de la rueda derecha  
-- $\omega_l\$: Velocidad angular de la rueda izquierda
-
-Entonces:
+El controlador del *Puzzlebot* se basa en el modelo de cinemática de un robot de accionamiento diferencial.
 
 $$
 \mathbf{v} = \frac{R}{2} (\omega_r + \omega_l)
@@ -90,22 +77,11 @@ $$
 
 $$\omega = \frac{R}{L} (\omega_r - \omega_l)\$$
 
-A partir de las velocidades lineal y angular deseadas (\( v, \omega \)), se puede obtener la velocidad de cada rueda:
+Estrategias de Control
 
-$$\omega_r = \frac{v}{R} + \frac{L \cdot \omega}{2R}\$$
+    Basado en OpenCV (PID): Ajusta la velocidad angular según la posición de la pelota.
 
-$$\\omega_l = \frac{v}{R} - \frac{L \cdot \omega}{2R}\$$
-
-Estas ecuaciones son fundamentales para convertir las señales de control en movimientos reales del robot.
-
-1. **Controlador basado en OpenCV**    
-   - A partir del error de posición de la pelota, se calculan las velocidades angulares necesarias para girar el robot.  
-   - Se determinan los ángulos de giro de cada llanta para asegurar que el seguimiento sea suave y preciso.
-
-2. **Controlador basado en distancia**  
-   - Calcula la distancia entre el *Puzzlebot* y la pelota.  
-   - Ajusta la velocidad lineal del robot: si la pelota está lejos, acelera; si está cerca, reduce la velocidad.  
-   - Este comportamiento está parametrizado, permitiendo definir una distancia deseada (*setpoint*) entre el robot y la pelota.
+    Basado en Distancia: Ajusta la velocidad lineal para mantener una distancia deseada.
 ---
 
 ## Demo

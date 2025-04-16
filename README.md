@@ -79,9 +79,9 @@ $$\omega = \frac{R}{L} (\omega_r - \omega_l)\$$
 
 Estrategias de Control
 
-    Basado en OpenCV (PID): Ajusta la velocidad angular según la posición de la pelota.
+- Basado en OpenCV (PID): Ajusta la velocidad angular según la posición de la pelota.
 
-    Basado en Distancia: Ajusta la velocidad lineal para mantener una distancia deseada.
+- Basado en Distancia: Ajusta la velocidad lineal para mantener una distancia deseada.
 ---
 
 ## Demo

@@ -5,6 +5,9 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
+    params = os.path.join(
+        get_package_share_directory('puzzlebot_control'),'conf','puzzlebot.yaml'
+    )
     # Path Generator node
     path_generator_node = Node(
         package='puzzlebot_control',
@@ -15,8 +18,9 @@ def generate_launch_description():
     # Controller node
     controller_node = Node(
         package='puzzlebot_control',
-        executable='test',  # Nombre del ejecutable para el nodo controller
-        output='screen'
+        executable='route',  # Nombre del ejecutable para el nodo controller
+        output='screen',
+        parameters=[params]
     )
 
     return LaunchDescription([

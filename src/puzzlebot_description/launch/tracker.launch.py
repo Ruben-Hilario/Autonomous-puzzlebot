@@ -1,4 +1,4 @@
-#Keep it simple launch file
+#Green ball Tracker Launch file
 import yaml
 import os
 from launch_ros.actions import Node
@@ -16,10 +16,17 @@ ARGUMENTS = [
 ]
 
 def generate_launch_description():
+    use_sim_time = LaunchConfiguration('use_sim_time')
+    robot_name = LaunchConfiguration('robot_name')
+    world = LaunchConfiguration('world')
+    # Paths
     pkg_gazebo = get_package_share_directory('puzzlebot_description')
     pkg_ros_ign_gazebo = get_package_share_directory('ros_gz_sim')
     gazebo_path = get_package_share_directory('puzzlebot_description') + '/models/' #"/home/testeo/src/puzzlebot_description/models/"
+    robot_path = get_package_share_directory('puzzlebot_description') + '/models/puzzlebot/model.urdf'
+    rviz_path = get_package_share_directory('puzzlebot_description') + '/models/puzzlebot/model.rviz'
 
+    # Environment Variables
     ign_resource_path = SetEnvironmentVariable(
         name='GZ_SIM_RESOURCE_PATH',
         value=[os.path.join(pkg_gazebo, 'models') + ':' + gazebo_path + ':' + '$GZ_SIM_RESOURCE_PATH']
@@ -53,7 +60,22 @@ def generate_launch_description():
         output='screen',
         arguments=['/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock']
     )
-
+        # Camera sensor bridge
+    camera_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='camera_bridge',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}],
+        arguments=[
+            ['/world/', world,'/model/', robot_name,'/link/chassis/sensor/camera/image' +'@sensor_msgs/msg/Image' +'[ignition.msgs.Image'],
+            ['/world/', world,'/model/', robot_name,'/link/chassis/sensor/camera/camera_info' +'@sensor_msgs/msg/CameraInfo' +'[ignition.msgs.CameraInfo'],
+            ],
+        remappings=[
+            (['/world/', world,'/model/', robot_name,'/link/chassis/sensor/camera/image'],'/video_source/raw'),
+            (['/world/', world,'/model/', robot_name,'/link/chassis/sensor/camera/camera_info'],'/camera_info')
+            ]
+    )
     # Launch Ignition Gazebo
     ignition_gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([ign_gazebo_launch]),
@@ -61,11 +83,33 @@ def generate_launch_description():
             'gz_args': [LaunchConfiguration('world'), '.sdf -r -v 4']
         }.items()
     )
-    
-    return LaunchDescription([*ARGUMENTS,
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d',rviz_path],
+        parameters=[{'use_sim_time':use_sim_time}]
+    )
+
+    ball_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='ball_bridge',
+        arguments=[
+            '/model/ball/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'
+        ],
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}]
+    )
+    return LaunchDescription([
+        *ARGUMENTS,
         ign_resource_path,
         ign_gui_plugin_path,
         ignition_gazebo,
         clock_bridge,
         bridge,
+        camera_bridge,
+        rviz_node,
+        ball_bridge
     ])

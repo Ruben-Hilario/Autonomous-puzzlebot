@@ -67,12 +67,13 @@
 
         <include>
             <uri>model://puzzlebot</uri>
-            <pose>-10.0 0 0.0 0 0 0</pose>
+            <!-- <pose>-10.0 0 0.0 0 0 0</pose> -->
+            <pose>0.0 0 0.0 0 0 0</pose>
         </include>
-        <include>
+        <!-- <include>
             <uri>/home/testeo/src/puzzlebot_description/models/ball/model.sdf</uri>
             <pose>-7.0 0 0.1 0 0 0</pose>
-        </include>
+        </include> -->
     </world>
 </sdf>
 

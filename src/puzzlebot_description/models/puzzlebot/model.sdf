@@ -252,7 +252,7 @@
             <rate>100</rate>
         </plugin>
         
-        <frame name="camera_frame" attached_to='chassis'>
+        <!-- <frame name="camera_frame" attached_to='chassis'>
             <pose>0 0.1 0.08 0 0 0</pose>
         </frame>
 
@@ -261,7 +261,7 @@
             name="gz::sim::systems::Sensors">
             <render_engine>ogre2</render_engine>
         </plugin>
-        
+         -->
     </model>
 
 </sdf>

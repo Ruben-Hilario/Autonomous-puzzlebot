@@ -6,6 +6,7 @@ from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Odometry
 import transforms3d
+from rclpy import qos
 
 class SquarePIDController(Node):
     def __init__(self):
@@ -18,8 +19,8 @@ class SquarePIDController(Node):
         self.odom_sub = self.create_subscription(
             Odometry, 
             'odom', 
-            self.odom_callback, 
-            10
+            self.odom_callback,
+            qos.qos_profile_sensor_data
         )
 
         # Control variables
@@ -33,9 +34,9 @@ class SquarePIDController(Node):
         self.rotation_angle = np.pi/2  # 90 degrees in radians
 
         # PID parameters (tune these as needed)
-        self.Kp_linear = 0.5
+        self.Kp_linear = 0.1
         self.Ki_linear = 0.01
-        self.Kd_linear = 0.1
+        self.Kd_linear = 0.001
         
         self.Kp_angular = 1.0
         self.Ki_angular = 0.05

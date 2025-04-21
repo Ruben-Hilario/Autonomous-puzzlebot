@@ -10,8 +10,8 @@ def generate_launch_description():
     )
     controller_node = Node(
         package='puzzlebot_control',
-        executable='closed_loop_control',
-        name='closed_loop_control',
+        executable='open_loop_control',
+        name='open_loop_control',
     )
     return LaunchDescription([odom,
         controller_node,]

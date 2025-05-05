@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'ball_tracker = opencv_res.ball_tracker:main',
+            'ball_decision = opencv_res.ball_decision:main',
         ],
     },
 )

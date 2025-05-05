@@ -1,0 +1,229 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+    <world name="ball_world">
+        <physics name="1ms" type="ignored">
+            <max_step_size>0.001</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+        </physics>
+        <plugin
+            filename="libignition-gazebo-physics-system.so"
+            name="ignition::gazebo::systems::Physics">
+        </plugin>
+        <plugin
+            filename="libignition-gazebo-user-commands-system.so"
+            name="ignition::gazebo::systems::UserCommands">
+        </plugin>
+        <plugin
+            filename="libignition-gazebo-scene-broadcaster-system.so"
+            name="ignition::gazebo::systems::SceneBroadcaster">
+        </plugin>
+
+        <scene>
+            <ambient>1.0 1.0 1.0</ambient>
+            <background>0.8 0.8 0.8</background>
+            <grid>true</grid>
+        </scene>
+
+        <light type="directional" name="sun">
+            <cast_shadows>true</cast_shadows>
+            <pose>0 0 10 0 0 0</pose>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+            <attenuation>
+                <range>1000</range>
+                <constant>0.9</constant>
+                <linear>0.01</linear>
+                <quadratic>0.001</quadratic>
+            </attenuation>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
+
+        <model name="ground_plane">
+            <static>true</static>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                        </plane>
+                    </geometry>
+                </collision>
+                <visual name="visual">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <material>
+                        <ambient>0.8 0.8 0.8 1</ambient>
+                        <diffuse>0.8 0.8 0.8 1</diffuse>
+                        <specular>0.8 0.8 0.8 1</specular>
+                    </material>
+                </visual>
+            </link>
+        </model>
+
+        <include>
+            <uri>model://puzzlebot</uri>
+            <pose>-6.0 0 0.0 0 0 0</pose>
+        </include>
+
+                <!-- Ball 1 - Blue -->
+        <model name="ball_1">
+            <link name="sphere">
+                <visual name="visual">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <material>
+                        <ambient>0.0 0.0 1.0 1.0</ambient>
+                        <diffuse>0.0 0.0 1.0 1.0</diffuse>
+                        <specular>0.0 0.0 0.0 1.0</specular>
+                    </material>
+                </visual>
+                <collision name="collision">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                </collision>
+            </link>
+            <pose>-3.0 0 0.1 0 0 0</pose>
+        </model>
+
+        <!-- Ball 2 - Red-Orange Mix -->
+        <model name="ball_2">
+            <link name="sphere">
+                <visual name="visual">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <material>
+                        <ambient>1.0 0.25 0.0 1.0</ambient>
+                        <diffuse>1.0 0.25 0.0 1.0</diffuse>
+                        <specular>0.0 0.0 0.0 1.0</specular>
+                    </material>
+                </visual>
+                <collision name="collision">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                </collision>
+            </link>
+            <pose>-4 3.5 0.1 0 0 0</pose>
+        </model>
+
+        <!-- Ball 3 - Yellow -->
+        <model name="ball_3">
+            <link name="sphere">
+                <visual name="visual">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <material>
+                        <ambient>1.0 1.0 0.0 1.0</ambient>
+                        <diffuse>1.0 1.0 0.0 1.0</diffuse>
+                        <specular>0.0 0.0 0.0 1.0</specular>
+                    </material>
+                </visual>
+                <collision name="collision">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                </collision>
+            </link>
+            <pose>-1.5 2.5 0.1 0 0 0</pose>
+        </model>
+
+        <!-- Ball 4 - Orange -->
+        <model name="ball_4">
+            <link name="sphere">
+                <visual name="visual">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <material>
+                        <ambient>1.0 0.25 0.0 1.0</ambient>
+                        <diffuse>1.0 0.25 0.0 1.0</diffuse>
+                        <specular>0.0 0.0 0.0 1.0</specular>
+                    </material>
+                </visual>
+                <collision name="collision">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                </collision>
+            </link>
+            <pose>1 2.5 0.1 0 0 0</pose>
+        </model>
+
+        <!-- Ball 5 - Blue -->
+        <model name="ball_5">
+            <link name="sphere">
+                <visual name="visual">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <material>
+                        <ambient>0.0 0.0 1.0 1.0</ambient>
+                        <diffuse>0.0 0.0 1.0 1.0</diffuse>
+                        <specular>0.0 0.0 0.0 1.0</specular>
+                    </material>
+                </visual>
+                <collision name="collision">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                </collision>
+            </link>
+            <pose>0 -0.5 0.1 0 0 0</pose>
+        </model>
+
+        <!-- Ball 6 - Yellow -->
+        <model name="ball_6">
+            <link name="sphere">
+                <visual name="visual">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <material>
+                        <ambient>1.0 1.0 0.0 1.0</ambient>
+                        <diffuse>1.0 1.0 0.0 1.0</diffuse>
+                        <specular>0.0 0.0 0.0 1.0</specular>
+                    </material>
+                </visual>
+                <collision name="collision">
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                </collision>
+            </link>
+            <pose>3 0.5 0.1 0 0 0</pose>
+        </model>
+
+    </world>
+</sdf>

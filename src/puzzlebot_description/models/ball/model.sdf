@@ -14,11 +14,24 @@
                         <radius>0.1</radius>
                     </sphere>
                 </geometry>
-                <material>
+                <!-- verde -->
+                <!-- <material>
                     <ambient>0.0 1.0 0.0 1.0</ambient>
                     <diffuse>0.0 1.0 0.0 1.0</diffuse>
+                    <specular>0.0 0.5 0.0 1.0</specular> 
+                </material> -->
+                <!-- amarilla -->
+                <material>
+                    <ambient>1.0 1.0 0.0 1.0</ambient>
+                    <diffuse>1.0 1.0 0.0 1.0</diffuse>
                     <specular>0.0 0.0 0.0 1.0</specular>
                 </material>
+                <!-- roja -->
+                <!-- <material>
+                    <ambient>0.0 1.0 0.0 1.0</ambient>
+                    <diffuse>1.0 0.0 0.0 1.0</diffuse>
+                    <specular>0.0 0.0 0.0 1.0</specular>
+                </material> -->
             </visual>
             
             <!-- Collision properties of the ball -->

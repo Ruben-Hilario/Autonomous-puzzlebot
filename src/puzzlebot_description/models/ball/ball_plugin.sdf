@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<sdf version='1.6'>
+    <model name="traffic_ball">
+        <static>false</static>
+        <link name="link">
+            <visual name="visual">
+            <geometry>
+                <sphere>
+                <radius>0.2</radius>
+                </sphere>
+            </geometry>
+            <material>
+                <ambient>1 1 1 1</ambient>
+            </material>
+            </visual>
+            <collision name="collision">
+            <geometry>
+                <sphere>
+                <radius>0.2</radius>
+                </sphere>
+            </geometry>
+            </collision>
+        </link>
+        <plugin name="ColorChangerPlugin" filename="libcolor_changer_plugin.so"/>
+        
+    </model>
+
+</sdf>

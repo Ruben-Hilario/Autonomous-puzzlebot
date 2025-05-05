@@ -15,8 +15,11 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-          ('share/' + package_name + '/models/puzzlebot', glob('models/puzzlebot/*.*')),
+        ('share/' + package_name + '/models/puzzlebot', glob('models/puzzlebot/*.*')),
         ('share/' + package_name + '/models/puzzlebot/meshes', glob('models/puzzlebot/meshes/*')),
+        ('share/' + package_name + '/models/wheelchair', glob('models/wheelchair/*.*')),
+        ('share/' + package_name + '/models/wheelchair/meshes', glob('models/wheelchair/meshes/*')),
+        
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -30,6 +33,7 @@ setup(
             'localization = puzzlebot_description.localization:main',
             'joint_pub = puzzlebot_description.joint_pub:main',
             'ball_movement = puzzlebot_control.ball_test:main',
+            'color_publisher = puzzlebot_description.color_publisher:main',
         ],
     },
 )

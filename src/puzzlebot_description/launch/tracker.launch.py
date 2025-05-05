@@ -23,7 +23,7 @@ def generate_launch_description():
     pkg_gazebo = get_package_share_directory('puzzlebot_description')
     pkg_ros_ign_gazebo = get_package_share_directory('ros_gz_sim')
     gazebo_path = get_package_share_directory('puzzlebot_description') + '/models/' #"/home/testeo/src/puzzlebot_description/models/"
-    robot_path = get_package_share_directory('puzzlebot_description') + '/models/puzzlebot/model.urdf'
+   # robot_path = get_package_share_directory('puzzlebot_description') + '/models/puzzlebot/model.urdf'
     rviz_path = get_package_share_directory('puzzlebot_description') + '/models/puzzlebot/model.rviz'
 
     # Environment Variables

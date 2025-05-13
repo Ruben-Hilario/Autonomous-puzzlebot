@@ -16,6 +16,11 @@ def generate_launch_description():
         executable='ball_route', 
         output='screen'
     )
+    prueba = Node(
+        package='puzzlebot_control',
+        executable='closed_loop_control',
+        output='screen'
+    )
     odometry_node = Node(
         package='puzzlebot_localisation',
         executable='puzzlebot_odometry',
@@ -23,7 +28,8 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        odometry_node,
         ball_decision,
-        controller_node,
-        odometry_node
+        #prueba,
+        controller_node
     ])

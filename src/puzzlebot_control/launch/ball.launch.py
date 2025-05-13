@@ -14,6 +14,11 @@ def generate_launch_description():
         package='puzzlebot_control',
         executable='ball_movement'
     )
+    odom = Node(
+        package='puzzlebot_localisation',
+        executable='puzzlebot_odometry',
+        name='puzzlebot_odometry',    
+    )
     controller_node = Node(
         package='puzzlebot_control',
         executable='PID', 
@@ -21,6 +26,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        odom,
         ball_tracker_node,
         ball_movement,
         controller_node,

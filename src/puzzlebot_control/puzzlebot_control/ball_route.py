@@ -3,92 +3,72 @@ import rclpy
 from rclpy.node import Node
 import numpy as np
 from std_msgs.msg import Float32
+from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Twist
+import transforms3d
 from rclpy import qos
 
-class ColorControl(Node):
+class SquarePIDController(Node):
     def __init__(self):
-        super().__init__('decision_node')
-        self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
-        self.subscription = self.create_subscription(Float32,'state',self.state_cb, 10)
-        self.subscription = self.create_subscription(Odometry,'odom',self.odom_cb,qos.qos_profile_sensor_data)
+        super().__init__('square_pid_controller')
         
-        #Control variables
-        self.light_state = 0        #Traffic light state
-        self.state = 0              #Path state
+        # Publisher to /cmd_vel
+        self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.subscription = self.create_subscription(Float32,'state',self.light_state_cb, 10)
+        # Subscriber to odometry
+        self.odom_sub = self.create_subscription(
+            Odometry, 
+            'odom', 
+            self.odom_callback,
+            qos.qos_profile_sensor_data
+        )
+        self.light_state = 0      
+        # Control variables
+        self.state = 0  # 0-3: forward + turn states, 4: stop
         self.side_count = 0
         self.current_pose = None
         self.goal_pose = None
-        self.state_start_time = self.get_clock().now()
 
-        #Parameters callback 
-        #self.declare_parameters('waypoints',[1.0,0.0,1.0,1.0,0.0,1.0,0.0,0.0])
-        #self.add_on_set_parameters_callback(self.parameters_callback)
-        #Route Parameters
-        self.side_length = 2.0
-        self.rotation_angle = np.pi/2 
+        # Square parameters
+        self.side_length = 2.0  # meters
+        self.rotation_angle = np.pi/2  # 90 degrees in radians
+
+        # PID parameters (tune these as needed)
+        self.Kp_linear = 0.1
+        self.Ki_linear = 0.01
+        self.Kd_linear = 0.001
         
-        # Define speeds
-        self.linear_speed = 0.3  # m/s
-        self.angular_speed = 0.5  # rad/s
-        
-        # === Linear PID constants ===
-        self.kp_linear = 0.05
-        self.ki_linear = 0.001
-        self.kd_linear = 0.01
+        self.Kp_angular = 1.0
+        self.Ki_angular = 0.05
+        self.Kd_angular = 0.2
 
-        self.kp_angular = 1.0
-        self.ki_angular = 0.05
-        self.kd_angular = 0.2
-
+        # Error accumulators for integral term
         self.integral_linear = 0.0
         self.integral_angular = 0.0
-        self.prev_error_lineal = 0.0
+        self.prev_error_linear = 0.0
         self.prev_error_angular = 0.0
 
-        self.linear_speed = 0.4 #idk if that's the right way
-        self.position_threshold = 0.05
-        self.angle_threshold = 0.05
+        # Thresholds
+        self.position_threshold = 0.05  # 5 cm
+        self.angle_threshold = 0.05    # ~3 degrees
 
-        # Timer to update state machine
-        self.timer_period = 0.1  # 10 Hz control loop
+        # Timer for control loop
+        self.timer_period = 0.1  # 10 Hz
         self.timer = self.create_timer(self.timer_period, self.control_loop)
-        self.get_logger().info("Control Node Started")
 
-    def state_cb(self,msg):
+        self.get_logger().info('Square PID controller initialized!')
+
+    def light_state_cb(self,msg):
         self.light_state = msg.data
         self.get_logger().info(f"Current state: {self.light_state}")
-
-    def odom_cb(self, msg):
+        
+    def odom_callback(self, msg):
         """Store current robot pose from odometry"""
         self.current_pose = msg.pose.pose
-        if self.current_pose is None:
-            self.get_logger().warn("Error not current pose detected")
-            return
-    # 
-    # def traffic_light(self):
-    #     cmd = Twist()
-    #     prev_state = 0
-    #     # State machine for square movement
-    #     if self.light_state == 0 and prev_state ==2:
-    #         #Green color -> Continue moving
-    #         self.control_loop()
-    #         self.get_logger().info('Green Color Detected. Moving forward...')
-    #         prev_state = self.state
-    #     elif self.light_state == 1 and prev_state == 0:
-    #         #Yellow Color -> Slow
-    #         cmd.linear.x = cmd.linear.x / 2
-    #         self.get_logger().info('Yellow Color detected. Waiting for red light.Slowing Down.')
-    #         prev_state = self.state
-    #     elif self.light_state == 2 and prev_state == 1:
-    #         cmd.linear.x = 0.0
-    #         self.get_logger().info('Red Color detected. Stopped.')
-    #         prev_state = self.state
-    #     else:
-    #         self.get_logger().info('Not valid color transition. Previous state is maintained')
-    #     # Publish velocity command
-    #     self.cmd_vel_pub.publish(cmd)
+        
+        # Initialize goal pose at first odom message
+        if self.goal_pose is None and self.current_pose is not None:
+            self.set_new_goal()
 
     def set_new_goal(self):
         """Set the next goal pose based on current state"""
@@ -157,7 +137,6 @@ class ColorControl(Node):
         return distance_error, angle_error
 
     def control_loop(self):
-        prev_state = 0
         if self.current_pose is None or self.goal_pose is None:
             return
 
@@ -166,7 +145,7 @@ class ColorControl(Node):
 
         if distance_error is None or angle_error is None:
             return
-        
+
         # State machine
         if self.state == 0:  # Moving forward
             # PID for linear motion
@@ -241,18 +220,10 @@ class ColorControl(Node):
         # Store errors for next iteration
         self.prev_error_linear = distance_error
         self.prev_error_angular = angle_error
-        if self.light_state == 2 and prev_state == 1:
-            cmd.linear.x = 0.0
-            self.get_logger().info('Red light detected. Stopping. Waiting for Green Light')
-        elif self.light_state == 1 and prev_state == 0:
-            cmd.linear.x = cmd.linear.x/2
-            self.get_logger().info('Yellow light detected. Slowing Down. Waiting for Red Light...')
-        elif self.light_stae == 0 and prev_state ==2:
-            self.get_logger().info('Green light detected. Moving Forward. Waiting for yellow light to slow down')
-        else:
-            self.get_logger().info('Invalid Color transition')
+
+        # Publish velocity command
         self.cmd_vel_pub.publish(cmd)
-            
+
     def reset_pid(self):
         """Reset PID accumulators when switching states"""
         self.integral_linear = 0.0
@@ -266,11 +237,10 @@ class ColorControl(Node):
         if result < 0:
             result += 2 * np.pi
         return result - np.pi
-        
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ColorControl()
+    node = SquarePIDController()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

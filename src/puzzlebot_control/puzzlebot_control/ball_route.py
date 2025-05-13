@@ -220,9 +220,16 @@ class SquarePIDController(Node):
         # Store errors for next iteration
         self.prev_error_linear = distance_error
         self.prev_error_angular = angle_error
-
-        # Publish velocity command
+        if self.light_state == 2:
+            cmd.linear.x = 0.0
+            #self.state=2
+            #self.get_logger().info('Red light detected. Stopping. Waiting for Green Light')
+        elif self.light_state == 1:
+            cmd.linear.x *=0.5
+            #self.get_logger().info('Yellow light detected. Slowing Down. Waiting for Red Light...')
+            #self.get_logger().info('Green light detected. Moving Forward. Waiting for yellow light to slow down')
         self.cmd_vel_pub.publish(cmd)
+        # Publish velocity command
 
     def reset_pid(self):
         """Reset PID accumulators when switching states"""

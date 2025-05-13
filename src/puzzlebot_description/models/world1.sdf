@@ -87,7 +87,7 @@
                             <radius>0.1</radius>
                         </sphere>
                     </geometry>
-                    <!-- verde -->
+                    <!-- amarilla -->
                     <material>
                         <ambient>1.0 1.0 0.0 1.0</ambient>
                         <diffuse>1.0 1.0 0.0 1.0</diffuse>
@@ -127,7 +127,7 @@
         </model>
         <model name='ball3' canonical_link='sphere3'>
             <link name='sphere3'>
-            <pose>-1.0 2.0 0.1 0 0 0</pose>
+            <pose>1.0 2.0 0.1 0 0 0</pose>
                 <!-- Visual representation of the ball -->
                 <visual name='visual'>
                     <geometry>
@@ -140,6 +140,58 @@
                         <ambient>0.0 1.0 0.0 1.0</ambient>
                         <diffuse>1.0 0.0 0.0 1.0</diffuse>
                         <specular>0.0 0.0 0.0 1.0</specular>
+                    </material>
+                </visual>
+                
+                <!-- Collision properties of the ball -->
+                <collision name='collision'>
+                    <geometry>
+                        <box><size>0.2 0.2 0.2</size></box>
+                    </geometry>
+                    <surface>
+                        <friction>
+                            <ode>
+                                <mu>1.0</mu> <!-- Adjust friction as needed -->
+                                <mu2>1.0</mu2>
+                            </ode>
+                        </friction>
+                        <restitution>
+                            <coe>0.0</coe> <!-- Control bounciness, adjust if needed -->
+                        </restitution>
+                    </surface>
+                </collision>
+
+
+                <!-- Inertial properties -->
+                <inertial>
+                    <mass>1.0</mass>
+                    <inertia>
+                        <ixx>0.01</ixx>
+                        <iyy>0.01</iyy>
+                        <izz>0.01</izz>
+                    </inertia>
+                </inertial>
+            </link>
+        </model>
+        <model name='ball_4' canonical_link='sphere4'>
+            <link name='sphere4'>
+            <pose>-1.0 2.0 0.1 0 0 0</pose>
+                <!-- Visual representation of the ball -->
+                <visual name='visual'>
+                    <geometry>
+                        <!-- <mesh>
+                            <uri>./meshes/ball.stl</uri>
+                            <scale>0.005 0.005 0.005 </scale>
+                        </mesh> -->
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <!-- verde -->
+                    <material>
+                        <ambient>0.0 1.0 0.0 1.0</ambient>
+                        <diffuse>0.0 1.0 0.0 1.0</diffuse>
+                        <specular>0.0 0.5 0.0 1.0</specular> 
                     </material>
                 </visual>
                 

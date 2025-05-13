@@ -10,7 +10,6 @@ from geometry_msgs.msg import TransformStamped
 from nav_msgs.msg import Odometry
 from tf2_ros import TransformBroadcaster
 
-
 class DeadReckoning(Node):
 
     def __init__(self):

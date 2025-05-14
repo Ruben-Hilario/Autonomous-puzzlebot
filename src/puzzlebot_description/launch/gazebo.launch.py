@@ -16,6 +16,9 @@ ARGUMENTS = [
 ]
 
 def generate_launch_description():
+    use_sim_time = LaunchConfiguration('use_sim_time')
+    robot_name = LaunchConfiguration('robot_name')
+    world = LaunchConfiguration('world')
     pkg_gazebo = get_package_share_directory('puzzlebot_description')
     pkg_ros_ign_gazebo = get_package_share_directory('ros_gz_sim')
     gazebo_path = get_package_share_directory('puzzlebot_description') + '/models/' #"/home/testeo/src/puzzlebot_description/models/"
@@ -61,8 +64,37 @@ def generate_launch_description():
             'gz_args': [LaunchConfiguration('world'), '.sdf -r -v 4']
         }.items()
     )
-    
+    camera_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='camera_bridge',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}],
+        arguments=[
+            ['/world/', world,'/model/', robot_name,'/link/chassis/sensor/camera/image' +'@sensor_msgs/msg/Image' +'[ignition.msgs.Image'],
+            ['/world/', world,'/model/', robot_name,'/link/chassis/sensor/camera/camera_info' +'@sensor_msgs/msg/CameraInfo' +'[ignition.msgs.CameraInfo'],
+            ],
+        remappings=[
+            (['/world/', world,'/model/', robot_name,'/link/chassis/sensor/camera/image'],'/video_source/raw'),
+            (['/world/', world,'/model/', robot_name,'/link/chassis/sensor/camera/camera_info'],'/camera_info')
+            ]
+    )
+    lidar_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='lidar_bridge',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}],
+        arguments=[
+            ['/world/', world,'/model/', robot_name,'/link/chassis/sensor/rplidar/scan' +'@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan']
+        ],
+        remappings=[(
+            ['/world/', world,'/model/', robot_name,'/link/chassis/sensor/rplidar/scan'],'scan'
+        )]
+    )
     return LaunchDescription([*ARGUMENTS,
+        #camera_bridge,
+        #lidar_bridge,
         ign_resource_path,
         ign_gui_plugin_path,
         ignition_gazebo,

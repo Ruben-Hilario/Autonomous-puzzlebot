@@ -1,0 +1,229 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+    <world name="world1">
+        <physics name="1ms" type="ignored">
+            <max_step_size>0.001</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+        </physics>
+        <plugin
+            filename="libignition-gazebo-physics-system.so"
+            name="ignition::gazebo::systems::Physics">
+        </plugin>
+        <plugin
+            filename="libignition-gazebo-user-commands-system.so"
+            name="ignition::gazebo::systems::UserCommands">
+        </plugin>
+        <plugin
+            filename="libignition-gazebo-scene-broadcaster-system.so"
+            name="ignition::gazebo::systems::SceneBroadcaster">
+        </plugin>
+       
+        <scene>
+            <ambient>1.0 1.0 1.0</ambient>
+            <background>0.8 0.8 0.8</background>
+            <grid>true</grid>
+        </scene>
+
+        <light type="directional" name="sun"    >
+            <cast_shadows>true</cast_shadows>
+            <pose>0 0 10 0 0 0</pose>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+            <attenuation>
+                <range>1000</range>
+                <constant>0.9</constant>
+                <linear>0.01</linear>
+                <quadratic>0.001</quadratic>
+            </attenuation>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
+
+
+        <model name="ground_plane">
+            <static>true</static>
+            <link name="link">
+                <collision name="collision">
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    </plane>
+                </geometry>
+                </collision>
+                <visual name="visual">
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>100 100</size>
+                    </plane>
+                </geometry>
+                <material>
+                    <ambient>0.8 0.8 0.8 1</ambient>
+                    <diffuse>0.8 0.8 0.8 1</diffuse>
+                    <specular>0.8 0.8 0.8 1</specular>
+                </material>
+                </visual>
+            </link>
+        </model>
+
+        <include>
+            <uri>model://puzzlebot</uri>
+            <pose>0.0 0 0.0 0 0 0</pose>
+        </include>
+        <include>
+            <uri>/home/testeo/src/puzzlebot_description/models/ball/model.sdf</uri>
+            <pose>3.0 0 0.1 0 0 0</pose>
+        </include>
+        <model name='ball_2' canonical_link='sphere2'>
+            <link name='sphere2'>
+            <pose>2.0 3.0 0.1 0 0 0</pose>
+                <!-- Visual representation of the ball -->
+                <visual name='visual'>
+                    <geometry>
+                        <!-- <mesh>
+                            <uri>./meshes/ball.stl</uri>
+                            <scale>0.005 0.005 0.005 </scale>
+                        </mesh> -->
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <!-- amarilla -->
+                    <material>
+                        <ambient>1.0 1.0 0.0 1.0</ambient>
+                        <diffuse>1.0 1.0 0.0 1.0</diffuse>
+                        <specular>0.0 0.0 0.0 1.0</specular>
+                    </material>
+                </visual>
+                
+                <!-- Collision properties of the ball -->
+                <collision name='collision'>
+                    <geometry>
+                        <box><size>0.2 0.2 0.2</size></box>
+                    </geometry>
+                    <surface>
+                        <friction>
+                            <ode>
+                                <mu>1.0</mu> <!-- Adjust friction as needed -->
+                                <mu2>1.0</mu2>
+                            </ode>
+                        </friction>
+                        <restitution>
+                            <coe>0.0</coe> <!-- Control bounciness, adjust if needed -->
+                        </restitution>
+                    </surface>
+                </collision>
+
+
+                <!-- Inertial properties -->
+                <inertial>
+                    <mass>1.0</mass>
+                    <inertia>
+                        <ixx>0.01</ixx>
+                        <iyy>0.01</iyy>
+                        <izz>0.01</izz>
+                    </inertia>
+                </inertial>
+            </link>
+        </model>
+        <model name='ball3' canonical_link='sphere3'>
+            <link name='sphere3'>
+            <pose>1.0 2.0 0.1 0 0 0</pose>
+                <!-- Visual representation of the ball -->
+                <visual name='visual'>
+                    <geometry>
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <!-- roja -->
+                    <material>
+                        <ambient>0.0 1.0 0.0 1.0</ambient>
+                        <diffuse>1.0 0.0 0.0 1.0</diffuse>
+                        <specular>0.0 0.0 0.0 1.0</specular>
+                    </material>
+                </visual>
+                
+                <!-- Collision properties of the ball -->
+                <collision name='collision'>
+                    <geometry>
+                        <box><size>0.2 0.2 0.2</size></box>
+                    </geometry>
+                    <surface>
+                        <friction>
+                            <ode>
+                                <mu>1.0</mu> <!-- Adjust friction as needed -->
+                                <mu2>1.0</mu2>
+                            </ode>
+                        </friction>
+                        <restitution>
+                            <coe>0.0</coe> <!-- Control bounciness, adjust if needed -->
+                        </restitution>
+                    </surface>
+                </collision>
+
+
+                <!-- Inertial properties -->
+                <inertial>
+                    <mass>1.0</mass>
+                    <inertia>
+                        <ixx>0.01</ixx>
+                        <iyy>0.01</iyy>
+                        <izz>0.01</izz>
+                    </inertia>
+                </inertial>
+            </link>
+        </model>
+        <model name='ball_4' canonical_link='sphere4'>
+            <link name='sphere4'>
+            <pose>-1.0 2.0 0.1 0 0 0</pose>
+                <!-- Visual representation of the ball -->
+                <visual name='visual'>
+                    <geometry>
+                        <!-- <mesh>
+                            <uri>./meshes/ball.stl</uri>
+                            <scale>0.005 0.005 0.005 </scale>
+                        </mesh> -->
+                        <sphere>
+                            <radius>0.1</radius>
+                        </sphere>
+                    </geometry>
+                    <!-- verde -->
+                    <material>
+                        <ambient>0.0 1.0 0.0 1.0</ambient>
+                        <diffuse>0.0 1.0 0.0 1.0</diffuse>
+                        <specular>0.0 0.5 0.0 1.0</specular> 
+                    </material>
+                </visual>
+                
+                <!-- Collision properties of the ball -->
+                <collision name='collision'>
+                    <geometry>
+                        <box><size>0.2 0.2 0.2</size></box>
+                    </geometry>
+                    <surface>
+                        <friction>
+                            <ode>
+                                <mu>1.0</mu> <!-- Adjust friction as needed -->
+                                <mu2>1.0</mu2>
+                            </ode>
+                        </friction>
+                        <restitution>
+                            <coe>0.0</coe> <!-- Control bounciness, adjust if needed -->
+                        </restitution>
+                    </surface>
+                </collision>
+
+
+                <!-- Inertial properties -->
+                <inertial>
+                    <mass>1.0</mass>
+                    <inertia>
+                        <ixx>0.01</ixx>
+                        <iyy>0.01</iyy>
+                        <izz>0.01</izz>
+                    </inertia>
+                </inertial>
+            </link>
+        </model>
+    </world>
+</sdf>

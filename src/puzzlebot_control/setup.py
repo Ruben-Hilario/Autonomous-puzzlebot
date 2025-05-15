@@ -34,8 +34,10 @@ setup(
             'ball_tracker = opencv_res.ball_tracker:main',
             'puzzlebot_odometry = puzzlebot_localisation.puzzlebot_odometry:main',
             'closed_loop_control = puzzlebot_control.closed_loop_control:main',
-            'ball_route = puzzlebot_control.ball_route:main',
-            'ball_decision = opencv_res.ball_decision:main',
+            'ball_route = puzzlebot_control.ball_route:main', #Cambiar el algoritmo
+            'ball_decision = opencv_res.ball_decision:main', 
+            'lidar = puzzlebot_control.lidar:main',
+            'tl = puzzlebot_control.traffic_light:main',
         ],
     },
 )

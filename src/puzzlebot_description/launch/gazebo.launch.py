@@ -93,8 +93,8 @@ def generate_launch_description():
         )]
     )
     return LaunchDescription([*ARGUMENTS,
-        #camera_bridge,
-        #lidar_bridge,
+        camera_bridge,
+        lidar_bridge,
         ign_resource_path,
         ign_gui_plugin_path,
         ignition_gazebo,

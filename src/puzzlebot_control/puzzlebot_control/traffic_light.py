@@ -11,10 +11,10 @@ from rclpy import qos
 class SquarePIDController(Node):
     def __init__(self):
         super().__init__('square_pid_controller')
-
+        
         # Publisher to /cmd_vel
         self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
-        
+        self.subscription = self.create_subscription(Float32,'state',self.light_state_cb, 10)
         # Subscriber to odometry
         self.odom_sub = self.create_subscription(
             Odometry, 
@@ -22,7 +22,7 @@ class SquarePIDController(Node):
             self.odom_callback,
             qos.qos_profile_sensor_data
         )
-
+        self.light_state = 0      
         # Control variables
         self.state = 0  # 0-3: forward + turn states, 4: stop
         self.side_count = 0
@@ -58,6 +58,10 @@ class SquarePIDController(Node):
 
         self.get_logger().info('Square PID controller initialized!')
 
+    def light_state_cb(self,msg):
+        self.light_state = msg.data
+        self.get_logger().info(f"Current state: {self.light_state}")
+        
     def odom_callback(self, msg):
         """Store current robot pose from odometry"""
         self.current_pose = msg.pose.pose
@@ -216,9 +220,16 @@ class SquarePIDController(Node):
         # Store errors for next iteration
         self.prev_error_linear = distance_error
         self.prev_error_angular = angle_error
-
-        # Publish velocity command
+        if self.light_state == 2:
+            cmd.linear.x = 0.0
+            #self.state=2
+            #self.get_logger().info('Red light detected. Stopping. Waiting for Green Light')
+        elif self.light_state == 1:
+            cmd.linear.x *=0.5
+            #self.get_logger().info('Yellow light detected. Slowing Down. Waiting for Red Light...')
+            #self.get_logger().info('Green light detected. Moving Forward. Waiting for yellow light to slow down')
         self.cmd_vel_pub.publish(cmd)
+        # Publish velocity command
 
     def reset_pid(self):
         """Reset PID accumulators when switching states"""

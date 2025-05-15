@@ -1,4 +1,5 @@
 # Imports
+# reemplazar por el algoritmo real
 import rclpy
 from rclpy.node import Node
 import numpy as np

@@ -1,202 +1,291 @@
-#Square PID
-# square_pid_movement.py
+# Imports
+# import rclpy
+# from rclpy.node import Node
+# import numpy as np
+# from std_msgs.msg import Float32
+# from geometry_msgs.msg import Twist, PoseStamped
+# from nav_msgs.msg import Odometry
+# import transforms3d
+# from rclpy import qos
 
-import rclpy
-from rclpy.node import Node
-from rclpy.parameter import Parameter
-import numpy as np
-import math
-from std_msgs.msg import Float32
-from geometry_msgs.msg import Twist
-from nav_msgs.msg import Odometry
+# class CustomMotionController(Node):
+#     def __init__(self):
+#         super().__init__('custom_motion_controller')
 
+#         # Publisher to /cmd_vel
+#         self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
 
-class PID:
-    def __init__(self, Kp=1.0, Ki=0.0, Kd=0.0):
-        self.Kp = Kp
-        self.Ki = Ki
-        self.Kd = Kd
-        self.prev_error = 0.0
-        self.integral = 0.0
+#         # Subscriber to odometry
+#         self.odom_sub = self.create_subscription(
+#             Odometry,
+#             'odom',
+#             self.odom_callback,
+#             qos.qos_profile_sensor_data
+#         )
 
-    def compute(self, error, dt):
-        self.integral += error * dt
-        derivative = (error - self.prev_error) / dt if dt > 0 else 0.0
-        output = self.Kp * error + self.Ki * self.integral + self.Kd * derivative
-        self.prev_error = error
-        return output
+#         # Control variables
+#         self.state = 0  # 0: avanzar 1.1, 1: girar izq 90, 2: avanzar 1.05, 3: girar der 90, 4: avanzar, 5: stop
+#         self.current_pose = None
+#         self.goal_pose = None
+#         self.initial_yaw = None # Para calcular el giro relativo
 
+#         # Motion parameters
+#         self.forward_distance_1 = 1.1  # meters
+#         self.forward_distance_2 = 1.05 # meters
+#         self.rotation_angle = np.pi / 2  # 90 degrees in radians
 
-class SquareMovement(Node):
-    def __init__(self):
-        super().__init__('square_movement')
+#         # PID parameters (tune these as needed)
+#         self.Kp_linear = 0.1
+#         self.Ki_linear = 0.01
+#         self.Kd_linear = 0.001
 
-        # Publisher and Subscriber
-        self.cmd_vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
-        self.odom_sub = self.create_subscription(Odometry, 'odom', self.odom_callback, 10)
-        self.linear_error_pub = self.create_publisher(Float32, 'linear_error', 10)
-        self.angular_error_pub = self.create_publisher(Float32, 'angular_error', 10)
+#         self.Kp_angular = 1.0
+#         self.Ki_angular = 0.05
+#         self.Kd_angular = 0.2
 
-        # Control state
-        self.state = 0
-        self.state_start_time = self.get_clock().now()
-        self.side_count = 0
+#         # Error accumulators for integral term
+#         self.integral_linear = 0.0
+#         self.integral_angular = 0.0
+#         self.prev_error_linear = 0.0
+#         self.prev_error_angular = 0.0
 
-        # Control and geometry
-        self.target_distance = 2.0  # meters
-        self.timer_period = 0.1  # seconds
-        self.timer = self.create_timer(self.timer_period, self.control_loop)
+#         # Thresholds
+#         self.position_threshold = 0.05  # 5 cm
+#         self.angle_threshold = 0.05    # ~3 degrees
 
-        # Pose tracking
-        self.current_yaw = 0.0
-        self.current_position = (0.0, 0.0)
-        self.start_position = None
-        self.target_yaw = None
+#         # Timer for control loop
+#         self.timer_period = 0.1  # 10 Hz
+#         self.timer = self.create_timer(self.timer_period, self.control_loop)
 
-        # PID Controllers
-        self.linear_pid = PID()
-        self.angular_pid = PID()
+#         self.get_logger().info('Custom motion controller initialized!')
 
-        # Declare parameters for tuning
-        self.declare_parameter('linear_Kp', 1.2)
-        self.declare_parameter('linear_Ki', 0.0)
-        self.declare_parameter('linear_Kd', 0.05)
+#     def odom_callback(self, msg):
+#         """Store current robot pose from odometry"""
+#         self.current_pose = msg.pose.pose
 
-        self.declare_parameter('angular_Kp', 1.5)
-        self.declare_parameter('angular_Ki', 0.0)
-        self.declare_parameter('angular_Kd', 0.1)
+#         # Initialize goal pose and initial yaw at first odom message
+#         if self.goal_pose is None and self.current_pose is not None:
+#             self.set_new_goal()
+#             orientation = self.current_pose.orientation
+#             quat = [orientation.w, orientation.x, orientation.y, orientation.z]
+#             _, _, self.initial_yaw = transforms3d.euler.quat2euler(quat)
 
-        self.update_pid_gains()
-        self.add_on_set_parameters_callback(self.parameter_callback)
+#     def set_new_goal(self):
+#         """Set the next goal pose based on current state"""
+#         if self.current_pose is None:
+#             return
 
-        # Optional: log errors to file
-        self.error_log = open('/tmp/pid_errors.csv', 'w')
-        self.error_log.write('time,linear_error,angular_error\n')
+#         self.goal_pose = PoseStamped()
+#         self.goal_pose.header.stamp = self.get_clock().now().to_msg()
+#         self.goal_pose.header.frame_id = 'odom'
 
-        self.get_logger().info('Square movement PID controller initialized!')
+#         # Get current orientation as Euler angles
+#         orientation = self.current_pose.orientation
+#         quat = [orientation.w, orientation.x, orientation.y, orientation.z]
+#         _, _, current_yaw = transforms3d.euler.quat2euler(quat)
 
-    def control_loop(self):
-        now = self.get_clock().now()
-        elapsed_time = (now - self.state_start_time).nanoseconds * 1e-9
-        cmd = Twist()
-        dt = self.timer_period
-        time_now = now.nanoseconds * 1e-9
+#         if self.state == 0:  # Move forward 1.1
+#             self.goal_pose.pose.position.x = (
+#                 self.current_pose.position.x +
+#                 self.forward_distance_1 * np.cos(current_yaw)
+#             )
+#             self.goal_pose.pose.position.y = (
+#                 self.current_pose.position.y +
+#                 self.forward_distance_1 * np.sin(current_yaw)
+#             )
+#             self.goal_pose.pose.orientation = self.current_pose.orientation
+#         elif self.state == 1:  # Turn left 90
+#             self.goal_pose.pose.position = self.current_pose.position
+#             new_yaw = current_yaw + self.rotation_angle
+#             new_quat = transforms3d.euler.euler2quat(0, 0, new_yaw)
+#             self.goal_pose.pose.orientation.x = new_quat[1]
+#             self.goal_pose.pose.orientation.y = new_quat[2]
+#             self.goal_pose.pose.orientation.z = new_quat[3]
+#             self.goal_pose.pose.orientation.w = new_quat[0]
+#         elif self.state == 2:  # Move forward 1.05
+#             self.goal_pose.pose.position.x = (
+#                 self.current_pose.position.x +
+#                 self.forward_distance_2 * np.cos(current_yaw)
+#             )
+#             self.goal_pose.pose.position.y = (
+#                 self.current_pose.position.y +
+#                 self.forward_distance_2 * np.sin(current_yaw)
+#             )
+#             self.goal_pose.pose.orientation = self.current_pose.orientation
+#         elif self.state == 3:  # Turn right 90
+#             self.goal_pose.pose.position = self.current_pose.position
+#             new_yaw = current_yaw - self.rotation_angle
+#             new_quat = transforms3d.euler.euler2quat(0, 0, new_yaw)
+#             self.goal_pose.pose.orientation.x = new_quat[1]
+#             self.goal_pose.pose.orientation.y = new_quat[2]
+#             self.goal_pose.pose.orientation.z = new_quat[3]
+#             self.goal_pose.pose.orientation.w = new_quat[0]
+#         elif self.state == 4: # Move forward indefinitely
+#             self.goal_pose.pose.position.x = (
+#                 self.current_pose.position.x + 1.0 * np.cos(current_yaw) # Small increment to keep moving
+#             )
+#             self.goal_pose.pose.position.y = (
+#                 self.current_pose.position.y + 1.0 * np.sin(current_yaw) # Small increment to keep moving
+#             )
+#             self.goal_pose.pose.orientation = self.current_pose.orientation
+#         elif self.state == 5: # Stop
+#             pass # Goal pose not needed
 
-        linear_error = 0.0
-        angular_error = 0.0
+#         self.get_logger().info(f'New goal set (state {self.state}): {self.goal_pose.pose.position if self.goal_pose else "None"}')
 
-        if self.state == 0:
-            if self.start_position is None:
-                self.start_position = self.current_position
+#     def calculate_errors(self):
+#         """Calculate position and angle errors"""
+#         if self.current_pose is None or self.goal_pose is None:
+#             return None, None
 
-            distance_traveled = self.compute_distance(self.start_position, self.current_position)
-            error = self.target_distance - distance_traveled
-            linear_error = error
+#         # Position error (distance to goal)
+#         dx = self.goal_pose.pose.position.x - self.current_pose.position.x
+#         dy = self.goal_pose.pose.position.y - self.current_pose.position.y
+#         distance_error = np.sqrt(dx**2 + dy**2)
 
-            linear_x = self.linear_pid.compute(error, dt)
-            cmd.linear.x = max(min(linear_x, 0.4), 0.0)
+#         # Angle error
+#         current_quat = [
+#             self.current_pose.orientation.w,
+#             self.current_pose.orientation.x,
+#             self.current_pose.orientation.y,
+#             self.current_pose.orientation.z
+#         ]
+#         goal_quat = [
+#             self.goal_pose.pose.orientation.w,
+#             self.goal_pose.pose.orientation.x,
+#             self.goal_pose.pose.orientation.y,
+#             self.goal_pose.pose.orientation.z
+#         ]
 
-            self.get_logger().info(f'Moving forward... Distance: {distance_traveled:.2f}, Error: {error:.2f}, Output: {linear_x:.2f}')
+#         _, _, current_yaw = transforms3d.euler.quat2euler(current_quat)
+#         _, _, goal_yaw = transforms3d.euler.quat2euler(goal_quat)
+#         angle_error = self.wrap_to_Pi(goal_yaw - current_yaw)
 
-            if abs(error) < 0.03:
-                self.state = 1
-                self.state_start_time = now
-                self.side_count += 1
-                self.start_position = None
-                self.get_logger().info(f'Finished side {self.side_count}. Starting turn...')
+#         return distance_error, angle_error
 
-        elif self.state == 1:
-            if self.target_yaw is None:
-                self.target_yaw = self.wrap_to_Pi(self.current_yaw + np.pi / 2)
+#     def control_loop(self):
+#         if self.current_pose is None:
+#             return
 
-            error = self.wrap_to_Pi(self.target_yaw - self.current_yaw)
-            angular_error = error
+#         cmd = Twist()
+#         distance_error, angle_error = self.calculate_errors()
 
-            angular_z = self.angular_pid.compute(error, dt)
-            cmd.angular.z = max(min(angular_z, 1.0), -1.0)
+#         if self.state < 4: # States with defined goals
+#             if distance_error is None or angle_error is None:
+#                 return
 
-            self.get_logger().info(f'Turning... Error: {error:.3f}, Output: {angular_z:.3f}')
+#             if self.state in [0, 2]: # Moving forward
+#                 # PID for linear motion
+#                 self.integral_linear += distance_error * self.timer_period
+#                 derivative = (distance_error - self.prev_error_linear) / self.timer_period
 
-            if abs(error) < 0.05:
-                if self.side_count < 4:
-                    self.state = 0
-                    self.state_start_time = now
-                    self.target_yaw = None
-                    self.get_logger().info('Turn complete. Moving forward...')
-                else:
-                    self.state = 2
-                    self.state_start_time = now
-                    self.get_logger().info('Square completed! Stopping...')
+#                 linear_vel = (
+#                     self.Kp_linear * distance_error +
+#                     self.Ki_linear * self.integral_linear +
+#                     self.Kd_linear * derivative
+#                 )
 
-        elif self.state == 2:
-            cmd.linear.x = 0.0
-            cmd.angular.z = 0.0
-            self.get_logger().info('Stopped.')
-            self.timer.cancel()
+#                 # Limit velocity
+#                 linear_vel = np.clip(linear_vel, -0.5, 0.5)
+#                 cmd.linear.x = linear_vel
 
-        # Publish
-        self.cmd_vel_pub.publish(cmd)
-        self.linear_error_pub.publish(Float32(data=linear_error))
-        self.angular_error_pub.publish(Float32(data=angular_error))
-        self.error_log.write(f'{time_now},{linear_error},{angular_error}\n')
+#                 # Small angular correction to face goal
+#                 target_angle = np.arctan2(
+#                     self.goal_pose.pose.position.y - self.current_pose.position.y,
+#                     self.goal_pose.pose.position.x - self.current_pose.position.x
+#                 )
+#                 current_quat = [
+#                     self.current_pose.orientation.w,
+#                     self.current_pose.orientation.x,
+#                     self.current_pose.orientation.y,
+#                     self.current_pose.orientation.z
+#                 ]
+#                 _, _, current_yaw = transforms3d.euler.quat2euler(current_quat)
+#                 angle_correction = self.wrap_to_Pi(target_angle - current_yaw)
 
-    def odom_callback(self, msg):
-        orientation_q = msg.pose.pose.orientation
-        siny_cosp = 2 * (orientation_q.w * orientation_q.z + orientation_q.x * orientation_q.y)
-        cosy_cosp = 1 - 2 * (orientation_q.y**2 + orientation_q.z**2)
-        self.current_yaw = math.atan2(siny_cosp, cosy_cosp)
+#                 cmd.angular.z = 0.5 * angle_correction # Simple P control for heading
 
-        pos = msg.pose.pose.position
-        self.current_position = (pos.x, pos.y)
+#                 # Check if reached position
+#                 if distance_error < self.position_threshold:
+#                     self.state += 1
+#                     self.reset_pid()
+#                     self.set_new_goal()
+#                     self.get_logger().info(f'Reached forward target. Moving to state {self.state}...')
 
-    def compute_distance(self, start_pos, current_pos):
-        dx = current_pos[0] - start_pos[0]
-        dy = current_pos[1] - start_pos[1]
-        return math.sqrt(dx ** 2 + dy ** 2)
+#             elif self.state in [1, 3]: # Turning
+#                 # PID for angular motion
+#                 self.integral_angular += angle_error * self.timer_period
+#                 derivative = (angle_error - self.prev_error_angular) / self.timer_period
 
-    def wrap_to_Pi(self, theta):
-        result = np.fmod((theta + np.pi), (2 * np.pi))
-        if result < 0:
-            result += 2 * np.pi
-        return result - np.pi
+#                 angular_vel = (
+#                     self.Kp_angular * angle_error +
+#                     self.Ki_angular * self.integral_angular +
+#                     self.Kd_angular * derivative
+#                 )
 
-    def update_pid_gains(self):
-        lin_Kp = self.get_parameter('linear_Kp').get_parameter_value().double_value
-        lin_Ki = self.get_parameter('linear_Ki').get_parameter_value().double_value
-        lin_Kd = self.get_parameter('linear_Kd').get_parameter_value().double_value
+#                 # Limit angular velocity
+#                 angular_vel = np.clip(angular_vel, -1.0, 1.0)
+#                 cmd.angular.z = angular_vel
 
-        ang_Kp = self.get_parameter('angular_Kp').get_parameter_value().double_value
-        ang_Ki = self.get_parameter('angular_Ki').get_parameter_value().double_value
-        ang_Kd = self.get_parameter('angular_Kd').get_parameter_value().double_value
+#                 # Check if reached angle
+#                 if abs(angle_error) < self.angle_threshold:
+#                     self.state += 1
+#                     self.reset_pid()
+#                     self.set_new_goal()
+#                     self.get_logger().info(f'Finished turn. Moving to state {self.state}...')
 
-        self.linear_pid.Kp = lin_Kp
-        self.linear_pid.Ki = lin_Ki
-        self.linear_pid.Kd = lin_Kd
+#         elif self.state == 4: # Move forward continuously
+#             cmd.linear.x = 0.3 # Constant forward velocity
+#             cmd.angular.z = 0.0
+#             self.set_new_goal() # Keep updating the goal slightly ahead
+#             self.get_logger().info('Moving forward continuously...')
 
-        self.angular_pid.Kp = ang_Kp
-        self.angular_pid.Ki = ang_Ki
-        self.angular_pid.Kd = ang_Kd
+#         elif self.state == 5: # Stop
+#             cmd.linear.x = 0.0
+#             cmd.angular.z = 0.0
+#             self.timer.cancel()
+#             self.get_logger().info('Stopping...')
 
-        self.get_logger().info(f'Updated PID gains. Linear: ({lin_Kp}, {lin_Ki}, {lin_Kd}), Angular: ({ang_Kp}, {ang_Ki}, {ang_Kd})')
+#         # Store errors for next iteration
+#         if distance_error is not None:
+#             self.prev_error_linear = distance_error
+#         if angle_error is not None:
+#             self.prev_error_angular = angle_error
 
-    def parameter_callback(self, params):
-        self.update_pid_gains()
-        return rclpy.parameter.ParameterEventHandler.Result(successful=True)
+#         # Publish velocity command
+#         self.cmd_vel_pub.publish(cmd)
 
+#         # Transition to the next state if the current one is done (for states 4 to 5)
+#         if self.state == 4:
+#             # You might want to add a condition here to eventually stop
+#             # For now, it will continue indefinitely until the program is stopped.
+#             pass # Keep moving forward
 
-def main(args=None):
-    rclpy.init(args=args)
-    node = SquareMovement()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        if hasattr(node, 'error_log'):
-            node.error_log.close()
-        node.destroy_node()
-        rclpy.shutdown()
+#     def reset_pid(self):
+#         """Reset PID accumulators when switching states"""
+#         self.integral_linear = 0.0
+#         self.integral_angular = 0.0
+#         self.prev_error_linear = 0.0
+#         self.prev_error_angular = 0.0
 
+#     def wrap_to_Pi(self, theta):
+#         """Wrap angle to [-π, π] range"""
+#         result = np.fmod((theta + np.pi), (2 * np.pi))
+#         if result < 0:
+#             result += 2 * np.pi
+#         return result - np.pi
 
-if __name__ == '__main__':
-    main()
+# def main(args=None):
+#     rclpy.init(args=args)
+#     node = CustomMotionController()
+#     try:
+#         rclpy.spin(node)
+#     except KeyboardInterrupt:
+#         pass
+#     finally:
+#         if rclpy.ok():
+#             rclpy.shutdown()
+#         node.destroy_node()
+
+# if __name__ == '__main__':
+#     main()

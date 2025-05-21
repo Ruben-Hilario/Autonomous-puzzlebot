@@ -38,6 +38,7 @@ setup(
             'ball_decision = opencv_res.ball_decision:main', 
             'lidar = puzzlebot_control.lidar:main',
             'tl = puzzlebot_control.traffic_light:main',
+            'line_follower = puzzlebot_control.line_follower:main'
         ],
     },
 )

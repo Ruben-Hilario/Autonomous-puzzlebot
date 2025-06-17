@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="pista_8">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>./meshes/pista_8.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>./meshes/pista_8.stl</uri>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+  </model>
+</sdf>

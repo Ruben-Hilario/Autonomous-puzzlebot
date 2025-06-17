@@ -60,6 +60,42 @@ class DeadReckoning(Node):
     def encL_callback(self, msg):
         self.wl = msg
 
+    # def run(self):
+    #     if self.first:
+    #         self.start_time = self.get_clock().now()
+    #         self.last_time = self.start_time
+    #         self.current_time = self.start_time
+    #         self.first = False
+    #         return
+    #     """ Updates robot position based on real elapsed time """
+    #     # Get current time and compute dt
+    #     current_time = self.get_clock().now()
+    #     dt = (current_time - self.last_time).nanoseconds * 1e-9  # Convert to seconds
+        
+    #     if dt > self._sample_time:
+    #         # Wheel Tangential Velocities (page 10-11)
+    #         self.v_r = self._r * self.wr.data
+    #         self.v_l = self._r * self.wl.data
+
+    #         # Robot Velocities (page 11-12)
+    #         self.V = (self.v_r + self.v_l) / 2.0  # Linear velocity
+    #         self.Omega = (self.v_r - self.v_l) / self._l  # Angular velocity
+
+    #         # Update position using Euler integration (page 14-15)
+    #         delta_theta = self.Omega * dt
+    #         self.Th += delta_theta
+            
+    #         # Wrap theta to [-π, π] (page 15)
+    #         self.Th = self.wrap_to_pi(self.Th)
+            
+    #         # Update x and y position (page 14)
+    #         delta_x = self.V * np.cos(self.Th) * dt
+    #         delta_y = self.V * np.sin(self.Th) * dt
+    #         self.X += delta_x
+    #         self.Y += delta_y
+
+    #         self.last_time = current_time
+    #         self.publish_odometry()
     def run(self):
         if self.first:
             self.start_time = self.get_clock().now()
@@ -67,29 +103,37 @@ class DeadReckoning(Node):
             self.current_time = self.start_time
             self.first = False
             return
-        
-        """ Updates robot position based on real elapsed time """
-        # Get current time and compute dt
+
         current_time = self.get_clock().now()
-        dt = (current_time - self.last_time).nanoseconds * 1e-9  # Convert to seconds
-        
+        dt = (current_time - self.last_time).nanoseconds * 1e-9  # Segundos
+
         if dt > self._sample_time:
-            # Wheel Tangential Velocities (page 10-11)
+            # Calcula velocidades tangenciales de las ruedas
             self.v_r = self._r * self.wr.data
             self.v_l = self._r * self.wl.data
 
-            # Robot Velocities (page 11-12)
-            self.V = (self.v_r + self.v_l) / 2.0  # Linear velocity
-            self.Omega = (self.v_r - self.v_l) / self._l  # Angular velocity
+            # Aquí agregas el umbral para descartar movimientos insignificantes
+            velocity_threshold = 1e-3  # Puedes ajustar este valor
 
-            # Update position using Euler integration (page 14-15)
+            if abs(self.v_r) < velocity_threshold and abs(self.v_l) < velocity_threshold:
+                # Velocidades demasiado pequeñas: considerar robot detenido
+                self.V = 0.0
+                self.Omega = 0.0
+                # Actualiza el tiempo para no acumular dt falso
+                self.last_time = current_time
+                # Publica odometría sin cambios (opcional)
+                self.publish_odometry()
+                return
+
+            # Si pasa el umbral, calcular velocidades lineal y angular
+            self.V = (self.v_r + self.v_l) / 2.0
+            self.Omega = (self.v_r - self.v_l) / self._l
+
+            # Actualiza posición y orientación
             delta_theta = self.Omega * dt
             self.Th += delta_theta
-            
-            # Wrap theta to [-π, π] (page 15)
             self.Th = self.wrap_to_pi(self.Th)
-            
-            # Update x and y position (page 14)
+
             delta_x = self.V * np.cos(self.Th) * dt
             delta_y = self.V * np.sin(self.Th) * dt
             self.X += delta_x
@@ -97,6 +141,7 @@ class DeadReckoning(Node):
 
             self.last_time = current_time
             self.publish_odometry()
+
 
     def wrap_to_pi(self, theta):
         """Wrap angle to [-π, π] range (page 15)"""

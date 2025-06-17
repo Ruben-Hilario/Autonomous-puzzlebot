@@ -13,7 +13,8 @@ def generate_launch_description():
         executable='lidar',
         name='lidar'
     )
-    return LaunchDescription([odom,
+    return LaunchDescription([
+        odom,
         lidar_node,
         
     ])

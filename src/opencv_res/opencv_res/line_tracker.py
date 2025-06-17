@@ -33,8 +33,9 @@ class LineFollowerNode(Node):
         pos = Point()
         #pos.x,pos.y = fl.line_detection_moments(fl.sharpened_filter(self.frame))
         #pos.x,pos.y = float(pos.x), float(pos.y)
-        pos.x, pos.y = map(float, fl.line_detection_moments(fl.sharpened_filter(self.frame)))
+        pos.x, pos.y, self.refined_img = map(float, fl.line_detection_moments(fl.sharpened_filter(self.frame)))
         self.get_logger().info(f'Publishing offset: ({pos.x:.2f}, {pos.y:.2f})')
+        cv.imshow("Setpoint",self.refined_img)
         pos.z = 0.0
         self.publisher.publish(pos)
 

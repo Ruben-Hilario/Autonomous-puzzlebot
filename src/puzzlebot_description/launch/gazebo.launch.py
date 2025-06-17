@@ -12,7 +12,7 @@ from launch.substitutions.path_join_substitution import PathJoinSubstitution
 ARGUMENTS = [
     DeclareLaunchArgument('use_sim_time', default_value='true'  , choices=['true', 'false'], description='Use sim time'),
     DeclareLaunchArgument('robot_name', default_value='puzzlebot', description='Ignition model name'),
-    DeclareLaunchArgument('world', default_value='world1', description='World name'),
+    DeclareLaunchArgument('world', default_value='ss_world', description='World name'),
 ]
 
 def generate_launch_description():
@@ -79,6 +79,7 @@ def generate_launch_description():
             (['/world/', world,'/model/', robot_name,'/link/chassis/sensor/camera/camera_info'],'/camera_info')
             ]
     )
+    
     lidar_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -92,6 +93,7 @@ def generate_launch_description():
             ['/world/', world,'/model/', robot_name,'/link/chassis/sensor/rplidar/scan'],'scan'
         )]
     )
+    
     return LaunchDescription([*ARGUMENTS,
         camera_bridge,
         lidar_bridge,

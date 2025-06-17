@@ -111,7 +111,7 @@ def line_detection_moments(resized_image):
 	                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)
 	
 
-	return avg_cx, avg_cy
+	return avg_cx, avg_cy, cv2.cvtColor(output, cv2.COLOR_BGR2RGB)
 	
 def line_detection_contours(resized_image):
 	roi, roi_height, roi_width = roi_(resized_image,0.5)

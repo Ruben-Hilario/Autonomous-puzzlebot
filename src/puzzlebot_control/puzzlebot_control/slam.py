@@ -30,7 +30,7 @@ class SLAMNavigator(Node):
         # Navigation parameters
         self.goal_x = 7.0
         self.goal_y = 8.0
-        self.safe_distance = 0.3
+        self.safe_distance = 0.2
         self.frontal_range = 60  # Increased frontal range for better detection
         self.max_linear_vel = 0.2
         self.max_angular_vel = 0.5
